@@ -19,6 +19,9 @@
     <Filter Include="Assets\Textures">
       <UniqueIdentifier>{7959acc6-0983-4ecb-82f0-5c8d4d0347bf}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Assets\Shaders">
+      <UniqueIdentifier>{5a4749bd-b40c-4452-8419-405648f5e352}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">
@@ -39,6 +42,9 @@
     <ClInclude Include="Cube.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="GameObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Game.cpp">
@@ -48,6 +54,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="stb_image.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GameObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -85,5 +94,13 @@
     <Image Include="Assets\Textures\uvtemplate.tga">
       <Filter>Assets\Textures</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Assets\Shaders\FragmentShader.txt">
+      <Filter>Assets\Shaders</Filter>
+    </Text>
+    <Text Include="Assets\Shaders\VertexShader.txt">
+      <Filter>Assets\Shaders</Filter>
+    </Text>
   </ItemGroup>
 </Project>

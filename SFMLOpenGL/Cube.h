@@ -6,31 +6,31 @@
 //Cube Vertices
 /*
 		  (-1.0f, 1.0f, -1.0f)          (1.0f, 1.0f, -1.0f)
-		          [7]                          [6]
-		          #-----------------------------#
-		         /|                            /|
-		        / |                           / |
+				  [7]                          [6]
+				  #-----------------------------#
+				 /|                            /|
+				/ |                           / |
 	  (-1.0f, 1.0f, 1.0f)           (1.0f, 1.0f, 1.0f)
 		  [3] /                         [2] /
-		     #-----------------------------#    |
-		     |    |                        |    |
-		     |    |                        |    |
-		     |   [4]                       |   [5]
+			 #-----------------------------#    |
+			 |    |                        |    |
+			 |    |                        |    |
+			 |   [4]                       |   [5]
 		  (-1.0f, -1.0f, -1.0f)         (1.0f, -1.0f, -1.0f)
-		     |    #-----------------------------#
-		     |   /                         |   /
-		     |  /                          |  /
-		     | /                           | /
-		     |/                            |/
-		     #-----------------------------#
-		    [0]                           [1]
+			 |    #-----------------------------#
+			 |   /                         |   /
+			 |  /                          |  /
+			 | /                           | /
+			 |/                            |/
+			 #-----------------------------#
+			[0]                           [1]
 	(-1.0f, -1.0f, 1.0f)         (1.0f, -1.0f, 1.0f)
 */
 
-const int VERTICES	= 24;	// Total Number of Vertices
-const int INDICES	= 12;	// Total Number of Indexes
-const int UVS		= 48;	// Total Number of UVs
-const int COLORS	= 24;	// Total Number of Colors
+const int VERTICES = 24;	// Total Number of Vertices
+const int INDICES = 12;	// Total Number of Indexes
+const int UVS = 48;	// Total Number of UVs
+const int COLORS = 24;	// Total Number of Colors
 
 static const GLfloat vertices[] =
 {
@@ -72,7 +72,7 @@ static const GLfloat vertices[] =
 };
 
 static const GLfloat colors[] = {
-	
+
 	// Front Face
 	1.0f, 0.0f, 0.0f, 1.0f, // [0]	// ( 0)
 	1.0f, 0.0f, 0.0f, 1.0f, // [1]	// ( 1)
@@ -110,7 +110,7 @@ static const GLfloat colors[] = {
 	1.0f, 0.0f, 1.0f, 1.0f, // [2]	// (23)
 };
 
-GLfloat uvs[2 * 4 * 6] = {
+static GLfloat uvs[2 * 4 * 6] = {
 	// Front Face (other faces populated in initialisation)
 	0.0, 0.0,
 	1.0, 0.0,
