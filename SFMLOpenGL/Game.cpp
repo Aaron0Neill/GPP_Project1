@@ -36,9 +36,9 @@ Game::Game() :
 	window(VideoMode(800, 600), 
 	"Introduction to OpenGL Texturing")
 {
-	for (int index = 0; index < MAX_CUBES; index++)
+	for (int index = 0; index < GAME_OBJECTS; index++)
 	{
-		m_enemyObjects[index] = new GameObject();
+		m_enemyObjects[index] = new GameObject(m_gameObjectStartPos);
 	}
 }
 
@@ -48,19 +48,39 @@ Game::Game(sf::ContextSettings settings) :
 	sf::Style::Default, 
 	settings)
 {
-	for (int index = 0; index < MAX_CUBES; index++)
+	m_gameObjectStartPos = vec3{ -14, -4, -4 };
+	glm::vec3 pos = m_gameObjectStartPos;
+	for (int index = 0; index < GAME_OBJECTS; index++)
 	{
-		m_enemyObjects[index] = new GameObject();
+		m_enemyObjects[index] = new GameObject(pos);
+		m_enemyObjects[index]->setState(CubeState::alive);
+		pos.x -= 2.5;
 	}
-	m_enemyObjects[0]->setPosition(glm::vec3(-5, 1, -3));
-	m_enemyObjects[1]->setPosition(glm::vec3(5, 1, -3));
+
+	pos = vec3(-12, -8, -4);
+
+	for (int index = 0; index < GROUND_OBJECTS; index++)
+	{
+		m_groundObjects[index] = new GameObject(pos);
+		m_groundObjects[index]->setState(CubeState::idle);
+		m_groundObjects[index]->setScale(3);
+		pos.x += 2 * 3; 
+	}
+
+	m_gravity = glm::vec3{ 0,.0598 * m_numberScalar,0 };
+	m_velocity = glm::vec3(10 * m_numberScalar, 0,0);
+
 }
 
 Game::~Game()
 {
-	for (int index = 0; index < MAX_CUBES; index++)
+	for (int index = 0; index < GAME_OBJECTS; index++)
 	{
 		delete m_enemyObjects[index];
+	}
+	for (int i = 0; i < GROUND_OBJECTS; i++)
+	{
+		delete m_groundObjects[i];
 	}
 }
 
@@ -102,7 +122,10 @@ void Game::initialize()
 	GLint isCompiled = 0;
 	GLint isLinked = 0;
 
-	glewInit();
+	if (!glewInit())
+	{
+		DEBUG_MSG("glewInit() failed"); 
+	}
 
 	DEBUG_MSG(glGetString(GL_VENDOR));
 	DEBUG_MSG(glGetString(GL_RENDERER));
@@ -289,13 +312,20 @@ void Game::update()
 	DEBUG_MSG("Updating...");
 #endif
 
-
+	for (int index = 0; index < GAME_OBJECTS; index++)
+	{
+		m_enemyObjects[index]->update();	
+	}
 
 	// Update Model View Projection
-	for (int index = 0; index < MAX_CUBES; index++)
+	for (int index = 0; index < GAME_OBJECTS; index++)
 	{
-		m_enemyObjects[index]->translate(glm::vec3(0.0001f,0.0f,0.0f));
-		mvp[index] = projection * view * m_enemyObjects[index]->getModel();
+		mvp[m_enemyObjects[index]->getModelNum()] = projection * view * m_enemyObjects[index]->getModel();
+	}
+
+	for (int index = 0; index < GROUND_OBJECTS; index++)
+	{
+		mvp[m_groundObjects[index]->getModelNum()] = projection * view * m_groundObjects[index]->getModel();
 	}
 }
 
@@ -312,11 +342,18 @@ void Game::render()
 	glEnableVertexAttribArray(positionID);
 	glEnableVertexAttribArray(colorID);
 	glEnableVertexAttribArray(uvID);
-	
-	for (int index = 0; index < MAX_CUBES; index++)
+
+	for (int i = 0; i < GROUND_OBJECTS; i++)
 	{
-		drawCube(mvp[index], m_enemyObjects[index]);
+		renderGround(m_groundObjects[i]);
 	}
+	
+	for (int index = 0; index < GAME_OBJECTS; index++)
+	{
+		drawCube(m_enemyObjects[index]);
+	}
+
+	window.display();
 
 	//Disable Arrays
 	glDisableVertexAttribArray(positionID);
@@ -325,18 +362,7 @@ void Game::render()
 	
 }
 
-void Game::unload()
-{
-#if (DEBUG >= 2)
-	DEBUG_MSG("Cleaning up...");
-#endif
-	glDeleteProgram(progID);	//Delete Shader
-	glDeleteBuffers(1, &vbo);	//Delete Vertex Buffer
-	glDeleteBuffers(1, &vib);	//Delete Vertex Index Buffer
-	stbi_image_free(img_data);		//Free image
-}
-
-void Game::drawCube(mat4 mvp, GameObject* obj)
+void Game::renderGround(GameObject* obj)
 {
 	//VBO Data....vertices, colors and UV's appended
 	glBufferSubData(GL_ARRAY_BUFFER, 0 * VERTICES * sizeof(GLfloat), 3 * VERTICES * sizeof(GLfloat), obj->getVertex());
@@ -344,7 +370,7 @@ void Game::drawCube(mat4 mvp, GameObject* obj)
 	glBufferSubData(GL_ARRAY_BUFFER, ((3 * VERTICES) + (4 * COLORS)) * sizeof(GLfloat), 2 * UVS * sizeof(GLfloat), obj->getUVS());
 
 	// Send transformation to shader mvp uniform
-	glUniformMatrix4fv(mvpID, 1, GL_FALSE, &mvp[0][0]);
+	glUniformMatrix4fv(mvpID, 1, GL_FALSE, &mvp[obj->getModelNum()][0][0]);
 
 	//Set Active Texture .... 32
 	glActiveTexture(GL_TEXTURE0);
@@ -359,5 +385,39 @@ void Game::drawCube(mat4 mvp, GameObject* obj)
 
 	//Draw Element Arrays
 	glDrawElements(GL_TRIANGLES, 3 * INDICES, GL_UNSIGNED_INT, NULL);
-	window.display();
+}
+
+void Game::unload()
+{
+#if (DEBUG >= 2)
+	DEBUG_MSG("Cleaning up...");
+#endif
+	glDeleteProgram(progID);	//Delete Shader
+	glDeleteBuffers(1, &vbo);	//Delete Vertex Buffer
+	glDeleteBuffers(1, &vib);	//Delete Vertex Index Buffer
+	stbi_image_free(img_data);		//Free image
+}
+
+void Game::drawCube(GameObject* obj)
+{
+	//VBO Data....vertices, colors and UV's appended
+	glBufferSubData(GL_ARRAY_BUFFER, 0 * VERTICES * sizeof(GLfloat), 3 * VERTICES * sizeof(GLfloat), obj->getVertex());
+	glBufferSubData(GL_ARRAY_BUFFER, 3 * VERTICES * sizeof(GLfloat), 4 * COLORS * sizeof(GLfloat), obj->getColour());
+	glBufferSubData(GL_ARRAY_BUFFER, ((3 * VERTICES) + (4 * COLORS)) * sizeof(GLfloat), 2 * UVS * sizeof(GLfloat), obj->getUVS());
+
+	// Send transformation to shader mvp uniform
+	glUniformMatrix4fv(mvpID, 1, GL_FALSE, &mvp[obj->getModelNum()][0][0]);
+
+	//Set Active Texture .... 32
+	glActiveTexture(GL_TEXTURE0);
+	glUniform1i(textureID, 0);
+
+	//Set pointers for each parameter (with appropriate starting positions)
+	//https://www.khronos.org/opengles/sdk/docs/man/xhtml/glVertexAttribPointer.xml
+	glVertexAttribPointer(positionID, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glVertexAttribPointer(colorID, 4, GL_FLOAT, GL_FALSE, 0, (VOID*)(3 * VERTICES * sizeof(GLfloat)));
+	glVertexAttribPointer(uvID, 2, GL_FLOAT, GL_FALSE, 0, (VOID*)(((3 * VERTICES) + (4 * COLORS)) * sizeof(GLfloat)));
+
+	//Draw Element Arrays
+	glDrawElements(GL_TRIANGLES, 3 * INDICES, GL_UNSIGNED_INT, NULL);
 }

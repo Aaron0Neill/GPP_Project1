@@ -1,6 +1,9 @@
 #ifndef GAME_H
 #define GAME_H
 
+#include <string>
+#include <sstream>
+
 #include <iostream>
 #include <GL/glew.h>
 #include <GL/wglew.h>
@@ -8,7 +11,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include <SFML/Window.hpp>
+#include <SFML/Graphics.hpp>
 #include <SFML/OpenGL.hpp>
 
 #include <Debug.h>
@@ -25,7 +28,12 @@ using namespace std;
 using namespace sf;
 using namespace glm;
 
-const unsigned MAX_CUBES{ 2 };
+const unsigned GAME_OBJECTS{ 4 };
+
+const unsigned GROUND_OBJECTS{ 5 };
+
+
+const unsigned MAX_CUBES{ GAME_OBJECTS + GROUND_OBJECTS };
 
 class Game
 {
@@ -36,16 +44,26 @@ public:
 	void run();
 
 private:
-	GameObject* m_enemyObjects[MAX_CUBES];
-	Window window;
+
+	bool m_jumping{ true };
+	GameObject* m_enemyObjects[GAME_OBJECTS];
+	RenderWindow window;
 	bool isRunning = false;
 	void initialize();
 	void update();
 	void render();
+	void renderGround(GameObject* obj);
 	void unload();
 
-	void drawCube(mat4 mvp, GameObject* obj);
-	void checkInput();
+	vec3 m_gravity;
+	vec3 m_velocity;
+	float m_numberScalar{ 0.00005 };
+
+	vec3 m_gameObjectStartPos;
+
+	GameObject* m_groundObjects[GROUND_OBJECTS];
+
+	void drawCube(GameObject* obj);
 };
 
 #endif
