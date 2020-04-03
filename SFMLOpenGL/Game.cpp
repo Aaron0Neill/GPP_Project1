@@ -70,6 +70,12 @@ Game::Game(sf::ContextSettings settings) :
 	m_gravity = glm::vec3{ 0,.0598 * m_numberScalar,0 };
 	m_velocity = glm::vec3(10 * m_numberScalar, 0,0);
 
+	mouseRadius = 50.0f;
+
+	cubeRadius = 150.0f;
+
+	totalRadius = mouseRadius + cubeRadius;
+
 }
 
 Game::~Game()
@@ -103,6 +109,27 @@ void Game::run()
 			if (event.type == Event::Closed)
 			{
 				isRunning = false;
+			}
+			
+			if (event.type == Event::MouseButtonPressed)
+			{
+				if (event.key.code == Mouse::Button::Left)
+				{
+					for (int index = 0; index < GAME_OBJECTS; index++)
+					{// check all the cubes against there hit boxes
+						sf::Vector2f cubePos{ calculateScreenPos(m_enemyObjects[index]->getPositon()) };
+
+						sf::Vector2f mousePos{ static_cast<sf::Vector2f>(Mouse::getPosition(window)) };
+
+						sf::Vector2f collisionVec{ cubePos - mousePos };
+
+						if (vectorLength(collisionVec) < totalRadius)
+						{
+							m_enemyObjects[index]->setState(CubeState::dead);
+							m_enemyObjects[index]->setVelocity(glm::vec3(0, 100, 75));
+						}
+					}
+				}
 			}
 		}
 		update();
@@ -396,6 +423,20 @@ void Game::unload()
 	glDeleteBuffers(1, &vbo);	//Delete Vertex Buffer
 	glDeleteBuffers(1, &vib);	//Delete Vertex Index Buffer
 	stbi_image_free(img_data);		//Free image
+}
+
+float Game::vectorLength(sf::Vector2f t_vec)
+{
+	float len{ sqrt(t_vec.x * t_vec.x + t_vec.y * t_vec.y) };
+	return len;
+}
+
+sf::Vector2f Game::calculateScreenPos(glm::vec3 t_pos)
+{
+	sf::Vector2f pos;
+	pos.x = { 800 * (t_pos.x + 10) / 28 };
+	pos.y = { 600 * (t_pos.y + 10) / 28 };
+	return pos;
 }
 
 void Game::drawCube(GameObject* obj)

@@ -28,7 +28,7 @@ using namespace std;
 using namespace sf;
 using namespace glm;
 
-const unsigned GAME_OBJECTS{ 4 };
+const unsigned GAME_OBJECTS{ 12 };
 
 const unsigned GROUND_OBJECTS{ 5 };
 
@@ -55,11 +55,21 @@ private:
 	void renderGround(GameObject* obj);
 	void unload();
 
+	float vectorLength(sf::Vector2f t_vec);
+
+	sf::Vector2f calculateScreenPos(glm::vec3 t_pos);
+
 	vec3 m_gravity;
 	vec3 m_velocity;
 	float m_numberScalar{ 0.00005 };
 
 	vec3 m_gameObjectStartPos;
+
+	float mouseRadius;
+
+	float cubeRadius;
+
+	float totalRadius;
 
 	GameObject* m_groundObjects[GROUND_OBJECTS];
 

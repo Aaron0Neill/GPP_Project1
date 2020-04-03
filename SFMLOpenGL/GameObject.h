@@ -34,6 +34,8 @@ public:
 
 	void setState(CubeState t_state) { m_currentState = t_state; };
 
+	void setVelocity(glm::vec3 t_velocity);
+
 	void setScale(float t_scale);
 
 	GLfloat* getVertex() { return &m_vertices[0]; }
@@ -50,13 +52,18 @@ public:
 
 private:
 
+	sf::CircleShape m_hitBox;
+
 	CubeState m_currentState;
 
 	float m_rotationSpeed;
 
+	glm::vec3 m_startVelocity;
 	glm::vec3 m_startPos;
 	glm::vec3 m_gravity;
 	glm::vec3 m_velocity;
+	glm::vec3 m_rotationAxis;
+
 	float m_numberScalar{ 0.00005 };
 
 	static GLuint m_totalModelNumber;

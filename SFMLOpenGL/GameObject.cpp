@@ -17,7 +17,10 @@ GameObject::GameObject(glm::vec3 t_startPos) :
 	m_totalModelNumber++;
 
 	m_gravity = glm::vec3{ 0,.0598 * m_numberScalar,0 };
-	m_velocity = glm::vec3(10 * m_numberScalar, 0, 0);
+	m_startVelocity = glm::vec3(10 * m_numberScalar, 0, 0);
+	m_rotationAxis = glm::vec3(1.0f, 0.0f, 0.0f);
+
+	m_velocity = m_startVelocity;
 
 	setPosition(m_startPos);
 
@@ -59,6 +62,11 @@ void GameObject::setPosition(glm::vec3 t_position)
 	m_model = glm::translate(m_model, m_position);
 }
 
+void GameObject::setVelocity(glm::vec3 t_velocity)
+{
+	m_velocity = t_velocity * m_numberScalar;
+}
+
 void GameObject::setScale(float t_scale)
 {
 	for (int i = 0; i < VERTICES * 3; i++)
@@ -69,20 +77,30 @@ void GameObject::setScale(float t_scale)
 
 void GameObject::update()
 {
-	if (m_position.x > 14)
+	if (m_currentState == CubeState::alive)
 	{
-		setPosition(m_startPos);
+		if (m_position.x > 14)
+		{
+			setPosition(m_startPos);
+		}
+		if (m_position.y < -4)
+		{
+			m_velocity.y = 75.0f * m_numberScalar;
+			m_rotationSpeed = -m_rotationSpeed;
+		}
+		rotate(glm::vec3(1, 0, 0));
 	}
-
-	if (m_position.y < -4)
+	else if (m_currentState == CubeState::dead)
 	{
-		m_velocity.y = 75.0f * m_numberScalar;
-		m_rotationSpeed = -m_rotationSpeed;
+		if (m_position.y < -10)
+		{
+			setPosition(m_startPos);
+			m_velocity = m_startVelocity;
+			m_currentState = CubeState::alive;
+		}
 	}
 
 	m_velocity -= m_gravity;
-
-	rotate(glm::vec3(1,0,0));
 
 	translate(m_velocity);
 }
